@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+      - name: myapp
+        image: dmrsoft/myapp:latest
+        volumeMounts:
+        - name: shared-volume
+          mountPath: /app/config
+        ports:
+        - containerPort: 5000
+        env:
+        - name: ENVIRONMENT
+          value: "production"
+      volumes:
+      - name: shared-volume
+        emptyDir: {}

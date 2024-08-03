@@ -1,27 +1,22 @@
 ﻿# DevOps Task Assessment
 
-## Part1:ProjectScope
+## Part1: Project Scope
 
-ThisassessmentinvolvessettingupalocalKubernetesenvironmentusingMinikube,
-implementingpersistentvolumes,secretsmanagement,andconfiguringdeployment
-manifestsforbothfrontendandbackendservices.Theprojectwillalsoincludeorganising
-anduploadingallnecessaryfilesandscriptstoaGitHubrepository.
+This assessment involves setting up a local Kubernetes environment using Minikube, implementing persistent volumes, secrets management, and configuring deployment manifests for both frontend and backend services. The project will also include organising and uploading all necessary files and scripts to a GitHub repository.
 
-## SettingUpMinikube
+## Setting Up Minikube
 
-ThisREADMEprovidesacomprehensiveguidetosettingupMinikubeforalocalKubernetes
-environment.MinikubeallowsyoutorunKubernetesclustersonyourlocalmachine,making
-itanexcellenttoolfordevelopmentandtesting.
+This README provides a comprehensive guide to setting up Minikube for a local Kubernetes environment. Minikube allows you to run Kubernetes clusters on your local machine, making it an excellent tool for development and testing.
 
 ## Prerequisites
 
 ```
-● OperatingSystem :Ubuntu.
-● Virtualization: uwslonwindows.
-● Tools: Installkubectlforinteractingwithyourcluster.
+Operating System: Ubuntu.
+Virtualization: uwsl on windows.
+Tools: Install kubectl for interacting with your cluster.
 ```
-**1.Installation
-1.1InstallingDocker**
+**1. Installation
+1.1 Installing Docker**
 
 ```
 sudo apt update
@@ -34,7 +29,7 @@ apt-key add -
 echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee
 /etc/apt/sources.list.d/kubernetes.list
 ```
-**1.2 InstallMinikube**
+**1.2 Install Minikube**
 
 ```
 curl -LO
@@ -43,7 +38,7 @@ md
 sudo install minikube-linux-amd64 /usr/local/bin/minikube
 minikube version
 ```
-**1.3 InstallKubectl**
+**1.3 Install Kubectl**
 
 
 ```
@@ -52,7 +47,7 @@ https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd
 sudo install minikube-linux-amd64 /usr/local/bin/minikube
 minikube version
 ```
-**1.4 StartingMinikubewithDockerDriver**
+**1.4 Starting Minikube with Docker Driver**
 
 ```
 minikube start --driver =docker
@@ -64,9 +59,9 @@ kubectl config view
 kubectl get nodes
 kubectl get pods
 ```
-### 2.1 DeployabackendApplication
+### 2.1 Deploy backend Application
 
-Youcandeployasimpleapplication,suchaspython-application:
+You can deploy a simple application, such as python-application:
 
 ```
 apiVersion : apps/v
@@ -102,10 +97,9 @@ containers :
 ```
 emptyDir : {}
 ```
-### 2.2 Createbackendservicemanifest
+### 2.2 Create backend service manifest
 
-First,youneedaServiceforthemyappDeploymentifitisn'talreadydefined.Here'san
-exampleservicemanifest:
+First, you need a Service for the myapp Deployment if it isn't already defined. Here's an example service manifest:
 
 ```
 apiVersion: v
@@ -121,7 +115,7 @@ ports:
     port: 5000
     targetPort: 5000
 
-### 2.3 DeployFrontendapp,serviceandingress:
+### 2.3Deploy Frontend app, service and ingress:
 
 ```
 apiVersion: apps/v
@@ -187,27 +181,26 @@ name: frontend-service
 port:
 number: 80
 
-### ConfigurationDetails
+### Configuration Details
 
-1. **FrontendDeployment** :
-    ○ TheDeploymentrunsanNginxservertoservethestaticfrontendfiles.
-    ○ TheConfigMapnamedfrontend-configshouldcontaintheHTML,CSS,
-       andJavaScriptfilesforthefrontend.
-2. **FrontendService** :
-    ○ ExposestheNginxserverinternallyintheKubernetescluster.
-3. **FrontendIngress** :
-    ○ Exposesthefrontendserviceexternallyatthehost
-       frontend.example.com.Replacethiswithyouractualdomain.
-4. **BackendService** :
+1. **Frontend Deployment** :
+    ○ The Deployment runs an Nginx server to serve the static frontend files.
+    ○ The ConfigMap named frontend-config should contain the HTML, CSS, and JavaScript files for the frontend.
+
+2. **Frontend Service** :
+    ○ Exposes the Nginx server internally in the Kubernetes cluster.
+
+3. **Frontend Ingress** :
+    ○ Exposes the frontend service externally at the host frontend.example.com. Replace this with your actual domain.
+4. **Backend Service** :
 
 
 ```
-○ Exposesthebackendapplicationwithinthecluster.
+○ Exposes the backend application within the cluster.
 ```
-### ● PVandPVC
+### ● PV and PVC
 
-APersistentVolume(PV)isapieceofstorageintheclusterthathasbeenprovisionedbyan
-administratorordynamicallyprovisionedusingStorageClasses
+A PersistentVolume (PV) is a piece of storage in the cluster that has been provisioned by an administrator or dynamically provisioned using Storage Classes
 
 ```
 apiVersion: v
@@ -225,7 +218,7 @@ storageClassName: manual
 hostPath:
 path: "/mnt/data"
 
-APersistentVolumeClaim(PVC)isarequestforstoragebyauser.Itissimilartoapod.
+A PersistentVolumeClaim (PVC) is a request for storage by a user. It is similar to a pod.
 
 ```
 apiVersion: v
@@ -241,21 +234,20 @@ requests:
 storage: 10Gi
 storageClassName: manual
 
-### ● KubernetesSecrets
+### ● Kubernetes Secrets
 
-KubernetesSecretsareusedtostoreandmanagesensitiveinformation,suchaspasswords,
-OAuthtokens,andsshkeys.
+Kubernetes Secrets are used to store and manage sensitive information, such as passwords, OAuth tokens, and ssh keys.
 
-**CreateaSecret**
+**Create a Secret**
 
-YoucancreateaSecretusingaYAMLfile
+You can create a Secret using a YAML file
 
 ```
 apiVersion: v
+kind: Secret
 ```
 
 ```
-kind: Secret
 metadata:
 name: myapp-secret
 type: Opaque
@@ -263,23 +255,22 @@ data:
 username: YWRtaW4= # Base64 encoded value of "admin"
 password: MWYyZDFlMmU2N2Rm # Base64 encoded value of "1f2d1e2e67df"
 ```
-Youcanuseecho -n 'admin' | base64toencodethevalues.
+You can use echo -n 'admin' | base64toencodethevalues.
 
 Using **kubectl create secret** command
 
 ```
-kubectlcreatesecretgenericmyapp-secret\
+kubectl create secret generic myapp-secret\
 --from-literal=username=admin\
 --from-literal=password=1f2d1e2e67df
 ```
-### ● UsingPVCandSecretintheDeployment
+### ● Using PVC and Secret in the Deployment
 
-YoucanthenusethisPVCinyourDeploymentbyreferencingitinthevolumesand
-volumeMountssections.
+You can then use this PVC in your Deployment by referencing it in the volumes and volumeMounts sections.
 
-### UpdatedDeploymentManifest
+### Updated Backend Deployment Manifest
 
-Here'sanupdatedmyappDeploymentmanifestthatusesthePVC:
+Here's an updated myapp Deployment manifest that uses the PVC:
 
 ```
 apiVersion: apps/v
@@ -304,10 +295,10 @@ containers:
     - name: config-volume
        mountPath: /app/config
     - name: data-volume
+       mountPath: /app/data
 
 
 ```
-mountPath: /app/data
 ports:
 ```
 - containerPort: 5000
@@ -331,9 +322,9 @@ emptyDir: {}
 persistentVolumeClaim:
 claimName: myapp-pvc
 
-### ApplyingtheManifests
+### Applying the Manifests
 
-Foreachmanifestfile,needtoapplythem:
+For each manifest file, need to apply them:
 
 ```
 kubectl apply -f myapp-pv.yaml
@@ -341,27 +332,28 @@ kubectl apply -f myapp-pvc.yaml
 kubectl apply -f myapp-secret.yaml
 kubectl apply -f myapp-deployment.yaml
 ```
-## RunningE2ETests
+## Running E2E Tests
 
 ```
-● InstallCypressoranotherE2Etestingframeworktotestthedeployedapplication.
+● Install Cypress or another E2E testing framework to test the deployed application.
 ```
 ```
 npx cypress run
 ```
 ```
-ThiscommandwillopentheCypressTestRunnerandcreateacypressdirectoryin
-yourproject,whereyoucanwriteyourtestfiles.
+This command will open the Cypress Test Runner and create a cypress directory in your project, where you can write your test files.
 ```
 ```
-● WritingaTestScript
+● Writing a Test Script
 ```
 ```
-Createatestfileinthecypress/e2edirectory,forexample,myapp.spec.js.
+Create a test file in the cypress/e2e directory, for example, myapp.spec.js.
+```
+```
+// cypress/e2e/myapp.spec.js
 ```
 
 ```
-// cypress/e2e/myapp.spec.js
 describe ('MyApp E2E Tests', () => {
 beforeEach (() => {
 cy .visit('http://frontend.example.com'); // URL of the frontend
@@ -395,10 +387,10 @@ cy .contains('Welcome, testuser');
 });
 ```
 ```
-● RunningtheTests
+● Running the tests
 ```
 ```
-YoucanrunthetestsusingtheCypressTestRunner
+You can run the tests using the Cypress Test Runner
 ```
 ```
 npx cypress run
@@ -406,56 +398,53 @@ npx cypress run
 #### Note:
 
 ```
-● Enableingresscontrollerforconfigureingress,pleaserunthiscommand
+● Enable ingress controller for configure ingress, please run this command
 minikube addons enable ingress
-● IntegrateE2ETestingcanbeautomatedwithCICDPipeline
+● Integrate E2E Testing can be automated with CICD Pipeline
+● Not need to expose the Backend external to the internet..
 ```
-### ValidatingSecretsManagement
+### Validating Secrets Management
 
-**A.CheckSecretsStatus**
+**A. Check Secrets Status**
 
 1. **ListSecrets:** kubectl get secrets
-    ● Ensurethesecretexistsandiscorrectlynamed.
+    ● Ensure the secret exists and is correctly named.
 
 
-2. **DescribetheSecret** :kubectl describe secret myapp-secret
-
-```
-● Thiscommandprovidesdetailsaboutthesecret,includingthenumberof
-dataitems.
-```
-3. **VerifySecretsUsageinPods**
+2. **Describe the Secret** :kubectl describe secret myapp-secret
 
 ```
-UseSecretsasEnvironmentVariables:
+● This command provides details about the secret, including the number of data items.
+```
+3. **Verify Secrets Usage in Pods**
+
+```
+Use Secrets as Environment Variables:
 ```
 ```
-● Ensurethatsecretsarecorrectlybeingsetasenvironmentvariablesinthe
-pods.
+● Ensure that secrets are correctly being set as environment variables in the pods.
 ```
-### ValidatingPersistentStorage
+### Validating Persistent Storage
 
-### PersistentVolumes(PVs)andPersistentVolumeClaims(PVCs)
+### Persistent Volumes(PVs) and Persistent Volume Claims(PVCs)
 
-**A.CheckPVandPVCStatus**
+**A. Check PV and PVCStatus**
 
-**1. ListPersistentVolumes(PVs):**
+**1. List Persistent Volumes(PVs):**
 
 ```
 kubectl get pv
-● EnsurethatthePVshavethecorrectstatus(Bound),indicatingtheyaresuccessfully
-boundtoaPVC.
+● Ensure that the PVs have the correct status (Bound), indicating they are successfully bound to a PVC.
+
 ```
-**2. ListPersistentVolumeClaims(PVCs):**
+**2. List Persistent Volume Claims(PVCs):**
     kubectl get pvc
 
-**B.StorageCapacityandAccessModes**
+**B. Storage Capacity and Access Modes**
 
-**1. CheckStorageCapacity:**
-    ○ EnsurethatthecapacitydefinedinthePVmatchesthecapacityrequestedin
-       thePVC.
-**2. CheckAccessModes:**
-    ○ Verifythattheaccessmodes(e.g.,ReadWriteOnce,ReadOnlyMany,
-       ReadWriteMany)arecorrectlysetandalignwithyourapplication'sneeds.
+**1. Check Storage Capacity:**
+    ○ Ensure that the capacity defined in the PV matches the capacity requested in the PVC.
+**2. Check Access Modes:**
+    ○ Verify that the access modes (e.g., ReadWriteOnce, ReadOnlyMany, ReadWriteMany) are correctly set and align with your application's needs.
 
 
