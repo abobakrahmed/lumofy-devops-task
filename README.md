@@ -391,3 +391,5 @@ kubectl get pvc
     ○ Ensure that the capacity defined in the PV matches the capacity requested in the PVC.
 **2. Check Access Modes:**
     ○ Verify that the access modes (e.g., ReadWriteOnce, ReadOnlyMany, ReadWriteMany) are correctly set and align with your application's needs.
+### Part 2: DevOps Lumofy Task
+***Please check the following [URL](https://docs.google.com/document/d/1_sDVnV8O03ZUH37wVO-aFgrJZOZ3SiyIo0xW-VXpztg/edit?usp=sharing)
