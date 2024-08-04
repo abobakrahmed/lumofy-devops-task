@@ -26,8 +26,7 @@ sudo systemctl enable docker
 sudo apt install -y apt-transport-https ca-certificates curl
 curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo
 apt-key add -
-echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee
-/etc/apt/sources.list.d/kubernetes.list
+echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee/etc/apt/sources.list.d/kubernetes.list
 ```
 **1.2 Install Minikube**
 
@@ -64,43 +63,38 @@ kubectl get pods
 You can deploy a simple application, such as python-application:
 
 ```
-apiVersion : apps/v
-kind : Deployment
-metadata :
-name : myapp
-spec :
-replicas : 1
-selector :
-matchLabels :
-app : myapp
-template :
-metadata :
-labels :
-app : myapp
-spec :
-containers :
-```
-- **name** : myapp
-    **image** : dmrsoft/ **myapp** :latest
-    **volumeMounts** :
-    - **name** : shared-volume
-       **mountPath** : /app/config
-    **ports** :
-    - **containerPort** : 5000
-    **env** :
-    - **name** : ENVIRONMENT
-       **value** : "production"
-**volumes** :
-- **name** : shared-volume
-
-
-```
-emptyDir : {}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+      - name: myapp
+        image: dmrsoft/myapp:latest
+        volumeMounts:
+        - name: shared-volume
+          mountPath: /app/config
+        ports:
+        - containerPort: 5000
+        env:
+        - name: ENVIRONMENT
+          value: "production"
+      volumes:
+      - name: shared-volume
+        emptyDir: {}
 ```
 ### 2.2 Create backend service manifest
 
 First, you need a Service for the myapp Deployment if it isn't already defined. Here's an example service manifest:
-
 ```
 apiVersion: v
 kind: Service
@@ -110,13 +104,11 @@ spec:
 selector:
 app: myapp
 ports:
-```
 - protocol: TCP
     port: 5000
     targetPort: 5000
-
-### 2.3Deploy Frontend app, service and ingress:
-
+```
+### 2.3 Deploy Frontend app, service and ingress:
 ```
 apiVersion: apps/v
 kind: Deployment
@@ -133,7 +125,6 @@ labels:
 app: frontend
 spec:
 containers:
-```
 - name: frontend
     image: nginx:latest# Nginx to serve static files
     volumeMounts:
@@ -144,10 +135,7 @@ containers:
 volumes:
 - name: frontend-volume
     configMap:
-
-
-```
-name: frontend-config
+       name: frontend-config
 ---
 apiVersion: v
 kind: Service
@@ -157,7 +145,6 @@ spec:
 selector:
 app: frontend
 ports:
-```
 - protocol: TCP
     port: 80
     targetPort: 80
@@ -180,7 +167,7 @@ service:
 name: frontend-service
 port:
 number: 80
-
+```
 ### Configuration Details
 
 1. **Frontend Deployment** :
@@ -193,11 +180,7 @@ number: 80
 3. **Frontend Ingress** :
     ○ Exposes the frontend service externally at the host frontend.example.com. Replace this with your actual domain.
 4. **Backend Service** :
-
-
-```
-○ Exposes the backend application within the cluster.
-```
+    ○ Exposes the backend application within the cluster.
 ### ● PV and PVC
 
 A PersistentVolume (PV) is a piece of storage in the cluster that has been provisioned by an administrator or dynamically provisioned using Storage Classes
@@ -211,13 +194,12 @@ spec:
 capacity:
 storage: 10Gi
 accessModes:
-```
 - ReadWriteOnce
 persistentVolumeReclaimPolicy: Retain
 storageClassName: manual
 hostPath:
 path: "/mnt/data"
-
+```
 A PersistentVolumeClaim (PVC) is a request for storage by a user. It is similar to a pod.
 
 ```
@@ -227,13 +209,12 @@ metadata:
 name: myapp-pvc
 spec:
 accessModes:
-```
 - ReadWriteOnce
 resources:
 requests:
 storage: 10Gi
 storageClassName: manual
-
+```
 ### ● Kubernetes Secrets
 
 Kubernetes Secrets are used to store and manage sensitive information, such as passwords, OAuth tokens, and ssh keys.
@@ -245,9 +226,6 @@ You can create a Secret using a YAML file
 ```
 apiVersion: v
 kind: Secret
-```
-
-```
 metadata:
 name: myapp-secret
 type: Opaque
@@ -288,7 +266,6 @@ labels:
 app: myapp
 spec:
 containers:
-```
 - name: myapp
     image: dmrsoft/myapp:latest
     volumeMounts:
@@ -296,11 +273,7 @@ containers:
        mountPath: /app/config
     - name: data-volume
        mountPath: /app/data
-
-
-```
 ports:
-```
 - containerPort: 5000
 env:
 - name: ENVIRONMENT
@@ -321,7 +294,7 @@ emptyDir: {}
 - name: data-volume
 persistentVolumeClaim:
 claimName: myapp-pvc
-
+```
 ### Applying the Manifests
 
 For each manifest file, need to apply them:
@@ -334,96 +307,67 @@ kubectl apply -f myapp-deployment.yaml
 ```
 ## Running E2E Tests
 
-```
 ● Install Cypress or another E2E testing framework to test the deployed application.
-```
 ```
 npx cypress run
 ```
-```
 This command will open the Cypress Test Runner and create a cypress directory in your project, where you can write your test files.
-```
-```
+
 ● Writing a Test Script
-```
 ```
 Create a test file in the cypress/e2e directory, for example, myapp.spec.js.
 ```
 ```
 // cypress/e2e/myapp.spec.js
-```
-
-```
 describe ('MyApp E2E Tests', () => {
 beforeEach (() => {
 cy .visit('http://frontend.example.com'); // URL of the frontend
 });
-```
-```
 it ('loads the homepage', () => {
 cy .contains('Welcome to MyApp Frontend');
 });
-```
-```
 it ('fetches data from the backend', () => {
 cy .intercept('GET', '/api/data').as('getData');
 cy .visit('http://frontend.example.com');
-```
-```
+
 cy .wait('@getData').its('response.statusCode').should('eq', 200 );
 cy .get('#data').should('contain', 'Expected data from backend');
 });
-```
-```
 it ('handles form submission', () => {
 cy .get('input[name="username"]').type('testuser');
 cy .get('input[name="password"]').type('password');
 cy .get('button[type="submit"]').click();
-```
-```
+
 cy .url().should('include', '/dashboard');
 cy .contains('Welcome, testuser');
 });
 });
 ```
-```
 ● Running the tests
-```
-```
 You can run the tests using the Cypress Test Runner
-```
 ```
 npx cypress run
 ```
 #### Note:
 
-```
 ● Enable ingress controller for configure ingress, please run this command
 minikube addons enable ingress
 ● Integrate E2E Testing can be automated with CICD Pipeline
 ● Not need to expose the Backend external to the internet..
-```
 ### Validating Secrets Management
 
 **A. Check Secrets Status**
 
-1. **ListSecrets:** kubectl get secrets
+1. **ListSecrets:** ```kubectl get secrets```
     ● Ensure the secret exists and is correctly named.
 
 
-2. **Describe the Secret** :kubectl describe secret myapp-secret
+2. **Describe the Secret** : ```kubectl describe secret myapp-secret```
 
-```
 ● This command provides details about the secret, including the number of data items.
-```
 3. **Verify Secrets Usage in Pods**
-
-```
 Use Secrets as Environment Variables:
-```
-```
 ● Ensure that secrets are correctly being set as environment variables in the pods.
-```
 ### Validating Persistent Storage
 
 ### Persistent Volumes(PVs) and Persistent Volume Claims(PVCs)
@@ -434,17 +378,16 @@ Use Secrets as Environment Variables:
 
 ```
 kubectl get pv
+```
 ● Ensure that the PVs have the correct status (Bound), indicating they are successfully bound to a PVC.
 
-```
 **2. List Persistent Volume Claims(PVCs):**
-    kubectl get pvc
-
+```
+kubectl get pvc
+```
 **B. Storage Capacity and Access Modes**
 
 **1. Check Storage Capacity:**
     ○ Ensure that the capacity defined in the PV matches the capacity requested in the PVC.
 **2. Check Access Modes:**
     ○ Verify that the access modes (e.g., ReadWriteOnce, ReadOnlyMany, ReadWriteMany) are correctly set and align with your application's needs.
-
-
